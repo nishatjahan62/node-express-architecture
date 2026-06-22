@@ -1,0 +1,1 @@
+export const addFunc =(a,b) => a+b
