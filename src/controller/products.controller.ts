@@ -1,9 +1,10 @@
 import type { IncomingMessage, ServerResponse } from "node:http"
+import { readProduct } from "../service/products.service"
 
 export const productsController =(req:IncomingMessage,res:ServerResponse)=>{
         const url =req.url
 const method= req.method
-
+/*
 // row users :
 const users =[
     {
@@ -13,11 +14,9 @@ const users =[
     id: 2,
     name:"products-2",
 }
-]
+] */
+const products =readProduct ()
 
-
-if (url==="/products" && method==="GET"){
     res.writeHead(200 ,{ "content-type" :" application/json"})
-   res.end(JSON.stringify({massage: "products" , data:{users}} ))
-}
+   res.end(JSON.stringify({massage: "products" , data:{products}} ))
 }

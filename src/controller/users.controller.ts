@@ -1,10 +1,11 @@
 import type { IncomingMessage, ServerResponse } from "node:http"
+import { readUsers } from "../service/users.service"
 
 export const userController =(req:IncomingMessage,res:ServerResponse)=>{
         const url =req.url
 const method= req.method
 
-// row users :
+/* // row users :
 const users =[
     {
     id: 1,
@@ -13,11 +14,11 @@ const users =[
     id: 2,
     name:"user-2",
 }
-]
+]*/
 
 
-if (url==="/users" && method==="GET"){
+const users = readUsers()
     res.writeHead(200 ,{ "content-type" :" application/json"})
    res.end(JSON.stringify({massage: "Users" , data:{users}} ))
-}
+
 }
