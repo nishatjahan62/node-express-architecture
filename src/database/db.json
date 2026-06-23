@@ -5,7 +5,9 @@
     { "id": 3, "name": "user-3", "email": "user3@mail.com" },
     { "id": 4, "name": "user-4", "email": "user4@mail.com" },
     { "id": 5, "name": "user-5", "email": "user5@mail.com" },
-    { "id": 1782227794782, "name": "user-6", "email": "user6@mail.com" }
+    { "id": 1782227794782, "name": "user-6", "email": "user6@mail.com" },
+    { "id": 1782228357955, "name": "user-7", "email": "user7@mail.com" },
+    { "id": 1782228368314, "name": "user-7", "email": "user7@mail.com" }
   ],
   "products": [
     { "id": 1, "name": "product-1", "price": 100 },
@@ -13,7 +15,7 @@
     { "id": 3, "name": "product-3", "price": 300 },
     { "id": 4, "name": "product-4", "price": 400 },
     { "id": 5, "name": "product-5", "price": 500 },
-    { "id": 1782227064218, "name": "product-6", "price": 100 },
+    { "id": 1782227064218, "name": "product-6", "price": 600 },
     { "id": 1782227101604, "name": "product-7", "price": 200 }
   ]
 }
