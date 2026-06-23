@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http"
-import { readProduct } from "../service/products.service"
+import { readProduct, writeProduct } from "../service/products.service"
 import type { ProductsInfo } from "../types/products.types"
 import { parsedBody } from "../utility/parsedBody"
 
@@ -28,7 +28,6 @@ const id = urlParts && urlParts[1] === "products" ? Number(urlParts[2]) : null
 // console.log("the id is = ",id)
 
 
-
 if (url==="/products" && method==="GET"){
  const products =readProduct ()
     res.writeHead(200 ,{ "content-type" :" application/json"})
@@ -39,9 +38,19 @@ if (url==="/products" && method==="GET"){
       res.writeHead(200 ,{ "content-type" :" application/json"})
    res.end(JSON.stringify({massage: `product no - ${id}` , data:{product}} ))
 } else if (method==="POST" && url === "/products") {
+
     const body = await parsedBody(req)
+const products =readProduct ()
+// making dynamic id
+const newProduct ={
+    id:Date.now(),
+    ...body
+}
+products.push(newProduct)
+ writeProduct(products)
+
        res.writeHead(200 ,{ "content-type" :" application/json"})
-   res.end(JSON.stringify({massage: "product created successfully" , data:{body}} ))
+   res.end(JSON.stringify({massage: "product created successfully" , data:{newProduct}} ))
    console.log(body)
 }
 }

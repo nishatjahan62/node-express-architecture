@@ -19,3 +19,9 @@ return productsData
 
 }
 
+export const writeProduct=(payload:any)=>{
+    const data = JSON.parse(fs.readFileSync(filePath , ("utf-8")) )
+    data.products =payload
+    console.log(payload)
+    fs.writeFileSync(filePath,JSON.stringify(data))
+}

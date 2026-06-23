@@ -16,7 +16,11 @@ if ( url ==="/" && method==="GET") {
 
 } else if (url?.startsWith("/users") && method==="GET"){
  userController(req,res)
-} else if (url?.startsWith("/products") && method === "GET") {
+} else if (url === "/users" && method === "POST") {
+userController(req, res) } 
+
+
+else if (url?.startsWith("/products") && method === "GET") {
     productsController(req, res)
 } else if (url === "/products" && method === "POST") {
     productsController(req, res) }
