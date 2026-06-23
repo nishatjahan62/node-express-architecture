@@ -38,10 +38,21 @@ export const productsController = async (
   } else if (method === "GET" && id !== null) {
     const products = readProduct();
     const product = products.find((p: ProductsInfo) => p.id === id);
+
+    if(!product){
+         res.writeHead(404, { "content-type": " application/json" });
+       res.end(
+         JSON.stringify({
+           massage: "product not found",
+           data: null
+         }),
+       );
+    }
     res.writeHead(200, { "content-type": " application/json" });
     res.end(
       JSON.stringify({ massage: `product no - ${id}`, data: { product } }),
     );
+
   }
   // created product with post / push
   else if (method === "POST" && url === "/products") {
@@ -86,5 +97,28 @@ export const productsController = async (
         data: products[index],
       }),
     );
-  }
+  }else if(method==="DELETE" && id !==null){
+  const products = readProduct()
+  
+  const index = products.findIndex((u: ProductsInfo) => u.id === id);
+   if(index<0){
+     res.writeHead(404, { "content-type": " application/json" });
+       res.end(
+         JSON.stringify({
+           massage: "index not found",
+           data: null
+         }),
+       );
+   }
+  
+       products.splice(index,1)
+       writeProduct(products)
+       res.writeHead(200, { "content-type": " application/json" });
+       res.end(
+         JSON.stringify({
+           massage: "product Deleted successfully",
+           data: products[index],
+         }),
+       );
+     }
 };

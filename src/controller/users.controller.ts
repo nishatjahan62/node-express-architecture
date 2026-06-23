@@ -31,8 +31,19 @@ if (method==="GET" && url ==="/users") {
 } else if (id !== null && method ==="GET") {
 const users =readUsers()
 const user = users.find((u:UsersInfo)=>u.id===id)
+if(!user){
+         res.writeHead(404, { "content-type": " application/json" });
+       res.end(
+         JSON.stringify({
+           massage: "user not found",
+           data: null
+         }),
+       );
+    }
   res.writeHead(200 ,{ "content-type" :" application/json"})
    res.end(JSON.stringify({massage: `user no - ${id}` , data:{user}} ))
+
+
 } else if (method==="POST" && url ==="/users"){
 
 const body = await parsedBody(req)
@@ -47,8 +58,7 @@ writeUsers(users)
   res.writeHead(200 ,{ "content-type" :" application/json"})
    res.end(JSON.stringify({massage: "user created successfully", data:{newUser}} ))
 
-}
- else if ((method === "PUT" || method === "PATCH") && id !== null) {
+}else if ((method === "PUT" || method === "PATCH") && id !== null) {
      const body = await parsedBody(req);
      const users = readUsers();
  
@@ -69,6 +79,30 @@ writeUsers(users)
      res.end(
        JSON.stringify({
          massage: "users updated successfully",
+         data: users[index],
+       }),
+     );
+   }
+   else if(method==="DELETE" && id !==null){
+const users = readUsers()
+
+const index = users.findIndex((u: UsersInfo) => u.id === id);
+  if(index<0){
+    res.writeHead(404, { "content-type": " application/json" });
+     res.end(
+       JSON.stringify({
+         massage: "index not found",
+         data: null
+       }),
+     );
+  }
+
+     users.splice(index,1)
+     writeUsers(users)
+     res.writeHead(200, { "content-type": " application/json" });
+     res.end(
+       JSON.stringify({
+         massage: "users Deleted successfully",
          data: users[index],
        }),
      );
