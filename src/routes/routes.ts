@@ -14,10 +14,10 @@ if ( url ==="/" && method==="GET") {
     // res.end({massage: `Node Server is running on port ${PORT}`}) // server will crash .. have to send with stringify
     res.end(JSON.stringify({massage: `Node Server is running on port ${PORT}`}))
 
-} else if (url==="/users" && method==="GET"){
+} else if (url?.startsWith("/users") && method==="GET"){
  userController(req,res)
-} else if (url==="/products" && method==="GET"){
-   productsController(req,res)
+} else if (url?.startsWith("/products") && method === "GET") {
+    productsController(req, res)
 } 
 else {
       // res.writeHead(404 ,{ "content-type" :" text/plain"})

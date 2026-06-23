@@ -13,7 +13,8 @@ export const readProduct=()=>{
 // using readFileSync here because there is no third party db (using local json file)
 
 const data = JSON.parse(products)
-console.log(data.products)
-return data.products
+// console.log(data.products)
+const productsData = data.products
+return productsData
 
 }
