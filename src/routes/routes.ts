@@ -18,7 +18,8 @@ if ( url ==="/" && method==="GET") {
  userController(req,res)
 } else if (url?.startsWith("/products") && method === "GET") {
     productsController(req, res)
-} 
+} else if (url === "/products" && method === "POST") {
+    productsController(req, res) }
 else {
       // res.writeHead(404 ,{ "content-type" :" text/plain"})
 res.writeHead(404 ,{ "content-type" :" application/json"})

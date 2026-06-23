@@ -1,12 +1,13 @@
 import type { IncomingMessage, ServerResponse } from "node:http"
 import { readProduct } from "../service/products.service"
 import type { ProductsInfo } from "../types/products.types"
+import { parsedBody } from "../utility/parsedBody"
 
-export const productsController =(req:IncomingMessage,res:ServerResponse)=>{
+export const productsController = async (req:IncomingMessage,res:ServerResponse)=>{
         const url =req.url
 const method= req.method
 
-
+// console.log("Request" , req)
 // row users :
 /*const users =[
     {
@@ -26,6 +27,8 @@ const urlParts =url?.split('/')
 const id = urlParts && urlParts[1] === "products" ? Number(urlParts[2]) : null
 // console.log("the id is = ",id)
 
+
+
 if (url==="/products" && method==="GET"){
  const products =readProduct ()
     res.writeHead(200 ,{ "content-type" :" application/json"})
@@ -35,5 +38,10 @@ if (url==="/products" && method==="GET"){
     const product = products.find((p:ProductsInfo)=>p.id===id)
       res.writeHead(200 ,{ "content-type" :" application/json"})
    res.end(JSON.stringify({massage: `product no - ${id}` , data:{product}} ))
+} else if (method==="POST" && url === "/products") {
+    const body = await parsedBody(req)
+       res.writeHead(200 ,{ "content-type" :" application/json"})
+   res.end(JSON.stringify({massage: "product created successfully" , data:{body}} ))
+   console.log(body)
 }
 }
