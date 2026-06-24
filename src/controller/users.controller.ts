@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from "node:http"
 import { readUsers, writeUsers } from "../service/users.service"
 import type { UsersInfo } from "../types/users.types"
 import { parsedBody } from "../utility/parsedBody"
+import { sendResponse } from "../utility/sendResponse"
 
 
 export const userController =async (req:IncomingMessage,res:ServerResponse)=>{
@@ -24,87 +25,61 @@ const users =[
 const pathParts = url?.split("/")
 const id = pathParts && pathParts[1] === "users" ? Number(pathParts[2]) : null
 
-if (method==="GET" && url ==="/users") {
-    const users = readUsers()
-    res.writeHead(200 ,{ "content-type" :" application/json"})
-   res.end(JSON.stringify({massage: "Users" , data:{users}} ))
-} else if (id !== null && method ==="GET") {
-const users =readUsers()
-const user = users.find((u:UsersInfo)=>u.id===id)
-if(!user){
-         res.writeHead(404, { "content-type": " application/json" });
-       res.end(
-         JSON.stringify({
-           massage: "user not found",
-           data: null
-         }),
-       );
+if (method === "GET" && url === "/users") {
+    try {
+        const users = readUsers();
+        return sendResponse(res, 200, true, "All users retrieved successfully", users)
+    } catch (error) {
+        return sendResponse(res, 500, false, "Something went wrong")
     }
-  res.writeHead(200 ,{ "content-type" :" application/json"})
-   res.end(JSON.stringify({massage: `user no - ${id}` , data:{user}} ))
 
+} else if (id !== null && method === "GET") {
+    try {
+        const users = readUsers();
+        const user = users.find((u: UsersInfo) => u.id === id);
+        if (!user) return sendResponse(res, 404, false, "User not found")
+        return sendResponse(res, 200, true, `User no - ${id}`, user)
+    } catch (error) {
+        return sendResponse(res, 500, false, "Something went wrong")
+    }
 
-} else if (method==="POST" && url ==="/users"){
+} else if (method === "POST" && url === "/users") {
+    try {
+        const body = await parsedBody(req);
+        const newUser = { id: Date.now(), ...body };
+        const users = readUsers();
+        users.push(newUser);
+        writeUsers(users);
+        return sendResponse(res, 201, true, "User created successfully", newUser)
+    } catch (error) {
+        return sendResponse(res, 500, false, "Something went wrong")
+    }
 
-const body = await parsedBody(req)
-const newUser ={
-    id: Date.now(),
-    ...body
+} else if ((method === "PUT" || method === "PATCH") && id !== null) {
+    try {
+        const body = await parsedBody(req);
+        const users = readUsers();
+        const index = users.findIndex((u: UsersInfo) => u.id === id);
+        // console.log(index)
+        if (index < 0) return sendResponse(res, 404, false, "User not found")
+        // users[index] = { ...users[index], ...body }  --- patch behavior
+        users[index] = { id: users[index].id, ...body };
+        writeUsers(users);
+        return sendResponse(res, 200, true, "User updated successfully", users[index])
+    } catch (error) {
+        return sendResponse(res, 500, false, "Something went wrong")
+    }
+
+} else if (method === "DELETE" && id !== null) {
+    try {
+        const users = readUsers();
+        const index = users.findIndex((u: UsersInfo) => u.id === id);
+        if (index < 0) return sendResponse(res, 404, false, "User not found")
+        users.splice(index, 1);
+        writeUsers(users);
+        return sendResponse(res, 200, true, "User deleted successfully")
+    } catch (error) {
+        return sendResponse(res, 500, false, "Something went wrong")
+    }
 }
-const users =readUsers()
-users.push(newUser)
-
-writeUsers(users)
-  res.writeHead(200 ,{ "content-type" :" application/json"})
-   res.end(JSON.stringify({massage: "user created successfully", data:{newUser}} ))
-
-}else if ((method === "PUT" || method === "PATCH") && id !== null) {
-     const body = await parsedBody(req);
-     const users = readUsers();
- 
-     const index = users.findIndex((u: UsersInfo) => u.id === id);
-     // console.log(index)
-     if (index < 0) {
-       res.writeHead(404, { "content-type": " application/json" });
-       res.end(
-         JSON.stringify({ massage: "The index is not found", data: null }),
-       );
-       return;
-     }
- // users[index] = { ...users[index], ...body }  --- patch behavior
-     users[index] = { id: users[index].id, ...body };
- 
-     writeUsers(users);
-     res.writeHead(200, { "content-type": " application/json" });
-     res.end(
-       JSON.stringify({
-         massage: "users updated successfully",
-         data: users[index],
-       }),
-     );
-   }
-   else if(method==="DELETE" && id !==null){
-const users = readUsers()
-
-const index = users.findIndex((u: UsersInfo) => u.id === id);
-  if(index<0){
-    res.writeHead(404, { "content-type": " application/json" });
-     res.end(
-       JSON.stringify({
-         massage: "index not found",
-         data: null
-       }),
-     );
-  }
-
-     users.splice(index,1)
-     writeUsers(users)
-     res.writeHead(200, { "content-type": " application/json" });
-     res.end(
-       JSON.stringify({
-         massage: "users Deleted successfully",
-         data: users[index],
-       }),
-     );
-   }
 }

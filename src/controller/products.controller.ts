@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { readProduct, writeProduct } from "../service/products.service";
 import type { ProductsInfo } from "../types/products.types";
 import { parsedBody } from "../utility/parsedBody";
+import { sendResponse } from "../utility/sendResponse";
 
 export const productsController = async (
   req: IncomingMessage,
@@ -32,93 +33,62 @@ export const productsController = async (
   // console.log("the id is = ",id)
 
   if (url === "/products" && method === "GET") {
-    const products = readProduct();
-    res.writeHead(200, { "content-type": " application/json" });
-    res.end(JSON.stringify({ massage: "products", data: { products } }));
-  } else if (method === "GET" && id !== null) {
-    const products = readProduct();
-    const product = products.find((p: ProductsInfo) => p.id === id);
-
-    if(!product){
-         res.writeHead(404, { "content-type": " application/json" });
-       res.end(
-         JSON.stringify({
-           massage: "product not found",
-           data: null
-         }),
-       );
+    try {
+        const products = readProduct();
+        return sendResponse(res, 200, true, "All products retrieved successfully", products)
+    } catch (error) {
+        return sendResponse(res, 500, false, "Something went wrong")
     }
-    res.writeHead(200, { "content-type": " application/json" });
-    res.end(
-      JSON.stringify({ massage: `product no - ${id}`, data: { product } }),
-    );
 
-  }
+} else if (method === "GET" && id !== null) {
+    try {
+        const products = readProduct();
+        const product = products.find((p: ProductsInfo) => p.id === id);
+        if (!product) return sendResponse(res, 404, false, "Product not found")
+        return sendResponse(res, 200, true, `Product no - ${id}`, product)
+    } catch (error) {
+        return sendResponse(res, 500, false, "Something went wrong")
+    }
+
+}
   // created product with post / push
-  else if (method === "POST" && url === "/products") {
-    const body = await parsedBody(req);
-    const products = readProduct();
-    // making dynamic id
-    const newProduct = {
-      id: Date.now(),
-      ...body,
-    };
-    products.push(newProduct);
-    writeProduct(products);
-    res.writeHead(200, { "content-type": " application/json" });
-    res.end(
-      JSON.stringify({
-        massage: "product created successfully",
-        data: { newProduct },
-      }),
-    );
-    //    console.log(body)
-  } else if ((method === "PUT" || method === "PATCH") && id !== null) {
-    const body = await parsedBody(req);
-    const products = readProduct();
-
-    const index = products.findIndex((p: ProductsInfo) => p.id === id);
-    // console.log(index)
-    if (index < 0) {
-      res.writeHead(404, { "content-type": " application/json" });
-      res.end(
-        JSON.stringify({ massage: "The index is not found", data: null }),
-      );
-      return;
+else if (method === "POST" && url === "/products") {
+    try {
+        const body = await parsedBody(req);
+        const products = readProduct();
+        // making dynamic id
+        const newProduct = { id: Date.now(), ...body };
+        products.push(newProduct);
+        writeProduct(products);
+        return sendResponse(res, 201, true, "Product created successfully", newProduct)
+    } catch (error) {
+        return sendResponse(res, 500, false, "Something went wrong")
     }
-// products[index] = { ...products[index], ...body }  --- patch behavior
-    products[index] = { id: products[index].id, ...body };
 
-    writeProduct(products);
-    res.writeHead(200, { "content-type": " application/json" });
-    res.end(
-      JSON.stringify({
-        massage: "product updated successfully",
-        data: products[index],
-      }),
-    );
-  }else if(method==="DELETE" && id !==null){
-  const products = readProduct()
-  
-  const index = products.findIndex((u: ProductsInfo) => u.id === id);
-   if(index<0){
-     res.writeHead(404, { "content-type": " application/json" });
-       res.end(
-         JSON.stringify({
-           massage: "index not found",
-           data: null
-         }),
-       );
-   }
-  
-       products.splice(index,1)
-       writeProduct(products)
-       res.writeHead(200, { "content-type": " application/json" });
-       res.end(
-         JSON.stringify({
-           massage: "product Deleted successfully",
-           data: products[index],
-         }),
-       );
-     }
-};
+} else if ((method === "PUT" || method === "PATCH") && id !== null) {
+    try {
+        const body = await parsedBody(req);
+        const products = readProduct();
+        const index = products.findIndex((p: ProductsInfo) => p.id === id);
+        // console.log(index)
+        if (index < 0) return sendResponse(res, 404, false, "Product not found")
+        // products[index] = { ...products[index], ...body }  --- patch behavior
+        products[index] = { id: products[index].id, ...body };
+        writeProduct(products);
+        return sendResponse(res, 200, true, "Product updated successfully", products[index])
+    } catch (error) {
+        return sendResponse(res, 500, false, "Something went wrong")
+    }
+
+} else if (method === "DELETE" && id !== null) {
+    try {
+        const products = readProduct();
+        const index = products.findIndex((p: ProductsInfo) => p.id === id);
+        if (index < 0) return sendResponse(res, 404, false, "Product not found")
+        products.splice(index, 1);
+        writeProduct(products);
+        return sendResponse(res, 200, true, "Product deleted successfully")
+    } catch (error) {
+        return sendResponse(res, 500, false, "Something went wrong")
+    }
+}}
